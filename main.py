@@ -328,7 +328,9 @@ def make_image(inputfile, outputfile, image_name, image_version, target_address,
     return 0
 
 def print_help():
-    print("\nTelechips Image Maker\n\n")
+    print("\nTelechips Image Maker")
+    print("Usage(windows): tcmk-convert <input_file> <output_file>")
+    print("Example: tcmk-convert input.bin output.rom")
 
 def main():
     if len(sys.argv) < 3:
