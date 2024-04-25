@@ -1,0 +1,58 @@
+name: Release Workflow
+
+on:
+  push:
+    tags:
+      - 'v*'
+permissions:
+  contents: write
+  actions: read
+  
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        path: tools
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y bzip2 tar zip
+
+    - name: Create tar.bz2 file
+      run: |
+        tar cjvf vcp-tools.tar.bz2 --exclude='tools/.git' --exclude='tools/.github' ./tools
+
+    - name: Print out the size of the tar.bz2 file
+      run: |
+        stat --printf="%s\n" vcp-tools.tar.bz2
+
+    - name: Generate SHA256 file
+      run: |
+        shasum -a 256 vcp-tools.tar.bz2 > vcp-tools.tar.bz2.sha256
+
+    - name: Create zip file for windows
+      run: |
+        zip -r vcp-tools.zip tools -x "tools/.git/*" "tools/.github/*"
+
+    - name: Print out the size of the zip file
+      run: |
+        stat --printf="%s\n" vcp-tools.zip
+
+    - name: Generate SHA256 file for zip
+      run: |
+        shasum -a 256 vcp-tools.zip > vcp-tools.zip.sha256
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          vcp-tools.tar.bz2
+          vcp-tools.tar.bz2.sha256
+          vcp-tools.zip
+          vcp-tools.zip.sha256
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
